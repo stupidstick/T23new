@@ -1,13 +1,12 @@
 package com.example.t23new.tree;
 
 import java.lang.reflect.Array;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-/**
- * @author swapnil
- */
-public class TwoThreeTreeGovno<K extends Comparable<K>, V> {
+
+public class TwoThreeTreeTest<K extends Comparable<K>, V> {
     private int size;
     private TreeNode root;
     private boolean successfulInsertion;
@@ -22,7 +21,7 @@ public class TwoThreeTreeGovno<K extends Comparable<K>, V> {
         LEFT, MIDDLE, RIGHT, DUMMY
     }
 
-    public TwoThreeTreeGovno(Class<K> keyClass) {
+    public TwoThreeTreeTest(Class<K> keyClass) {
         size = 0;
         root = null;
         successfulInsertion = false;
@@ -46,17 +45,6 @@ public class TwoThreeTreeGovno<K extends Comparable<K>, V> {
 
         TreeNode() {
             degree = 0;
-        }
-
-        void print() {
-
-            if (degree == 1) {
-                System.out.print("(-,-)");
-            } else if (degree == 2) {
-                System.out.print("(" + keys[0] + ",-) ");
-            } else {
-                System.out.print("(" + keys[0] + "," + keys[1] + ") ");
-            }
         }
 
         @Override
@@ -89,9 +77,9 @@ public class TwoThreeTreeGovno<K extends Comparable<K>, V> {
         }
     }
 
-    private void insertKey(K key, V val) {
+    private void insertKey(K key, V val, Runnable runnable) {
         Node[] array;
-        array = insert(key, val, root);
+        array = insert(key, val, root, runnable);
         if (array[1] == null) {
             root = (TreeNode) array[0];
         } else {
@@ -104,7 +92,8 @@ public class TwoThreeTreeGovno<K extends Comparable<K>, V> {
     }
 
     @SuppressWarnings("unchecked")
-    private Node[] insert(K key, V val, Node n) {
+    private Node[] insert(K key, V val, Node n, Runnable runnable) {
+        runnable.run();
         Node[] array = (Node[]) Array.newInstance(Node.class, 2);
         Node[] catchArray = (Node[]) Array.newInstance(Node.class, 2);
 
@@ -115,14 +104,14 @@ public class TwoThreeTreeGovno<K extends Comparable<K>, V> {
         if (root == null && !first) {
             first = true;
             t = new TreeNode();
-            t.children[0] = insert(key, val, t.children[0])[0];
+            t.children[0] = insert(key, val, t.children[0], runnable)[0];
             updateTree(t);
             array[0] = t;
             array[1] = null;
 
         } else if (t != null && !(t.children[0] instanceof LeafNode)) {
             if (key.compareTo(t.keys[0]) < 0) {
-                catchArray = insert(key, val, t.children[0]);
+                catchArray = insert(key, val, t.children[0], runnable);
                 t.children[0] = catchArray[0];
                 if (split) {
                     if (t.degree <= 2) {
@@ -149,7 +138,7 @@ public class TwoThreeTreeGovno<K extends Comparable<K>, V> {
                     array[1] = null;
                 }
             } else if (key.compareTo(t.keys[0]) >= 0 && (t.children[2] == null || key.compareTo(t.keys[1]) < 0)) {
-                catchArray = insert(key, val, t.children[1]);
+                catchArray = insert(key, val, t.children[1], runnable);
                 t.children[1] = catchArray[0];
                 if (split) {
                     if (t.degree <= 2) {
@@ -174,7 +163,7 @@ public class TwoThreeTreeGovno<K extends Comparable<K>, V> {
                     array[1] = null;
                 }
             } else if (key.compareTo(t.keys[1]) >= 0) {
-                catchArray = insert(key, val, t.children[2]);
+                catchArray = insert(key, val, t.children[2], runnable);
                 t.children[2] = catchArray[0];
                 if (split) {
                     if (t.degree > 2) {
@@ -284,7 +273,8 @@ public class TwoThreeTreeGovno<K extends Comparable<K>, V> {
         return array;
     }
 
-    private Node remove(K key, Node n) {
+    private Node remove(K key, Node n, Runnable runnable) {
+        runnable.run();
         TreeNode t = null;
         if (n instanceof TreeNode) {
             t = (TreeNode) n;
@@ -294,7 +284,7 @@ public class TwoThreeTreeGovno<K extends Comparable<K>, V> {
         }
         if (t != null && t.children[0] instanceof TreeNode) {
             if (key.compareTo(t.keys[0]) < 0) {
-                t.children[0] = remove(key, t.children[0]);
+                t.children[0] = remove(key, t.children[0], runnable);
                 if (singleNodeUnderflow) {
                     TreeNode child = (TreeNode) t.children[0];
                     TreeNode rightChild = (TreeNode) t.children[1];
@@ -355,7 +345,7 @@ public class TwoThreeTreeGovno<K extends Comparable<K>, V> {
                 }
                 updateTree(t);
             } else if (key.compareTo(t.keys[0]) >= 0 && (t.children[2] == null || key.compareTo(t.keys[1]) < 0)) {
-                t.children[1] = remove(key, t.children[1]);
+                t.children[1] = remove(key, t.children[1], runnable);
                 if (singleNodeUnderflow) {
                     TreeNode leftChild = (TreeNode) t.children[0];
                     TreeNode child = (TreeNode) t.children[1];
@@ -445,7 +435,7 @@ public class TwoThreeTreeGovno<K extends Comparable<K>, V> {
                 }
                 updateTree(t);
             } else if (key.compareTo(t.keys[1]) >= 0) {
-                t.children[2] = remove(key, t.children[2]);
+                t.children[2] = remove(key, t.children[2], runnable);
                 if (singleNodeUnderflow) {
                     TreeNode child = (TreeNode) t.children[2];
                     TreeNode leftChild = (TreeNode) t.children[1];
@@ -598,8 +588,64 @@ public class TwoThreeTreeGovno<K extends Comparable<K>, V> {
         } else if (l != null && key.compareTo(l.key) == 0) {
             return true;
         }
-
         return found;
+    }
+
+    public V get(K key, Runnable runnable) {
+        LeafNode searched = searchNode(key, root, runnable);
+        if (searched == null) {
+            throw new IllegalArgumentException("Node with key " + key + " not found");
+        }
+        return searched.val;
+    }
+
+    private LeafNode searchNode(K key, Node n, Runnable runnable) {
+        runnable.run();
+        LeafNode found = null;
+        TreeNode t = null;
+        LeafNode l = null;
+        if (n instanceof TreeNode) {
+            t = (TreeNode) n;
+        } else {
+            l = (LeafNode) n;
+        }
+        if (t != null) {
+            if (t.degree == 1) {
+                found = searchNode(key, t.children[0], runnable);
+            } else if (t.degree == 2 && key.compareTo(t.keys[0]) < 0) {
+                found = searchNode(key, t.children[0], runnable);
+            } else if (t.degree == 2 && key.compareTo(t.keys[0]) >= 0) {
+                found = searchNode(key, t.children[1], runnable);
+            } else if (t.degree == 3 && key.compareTo(t.keys[0]) < 0) {
+                found = searchNode(key, t.children[0], runnable);
+            } else if (t.degree == 3 && key.compareTo(t.keys[0]) >= 0 && key.compareTo(t.keys[1]) < 0) {
+                found = searchNode(key, t.children[1], runnable);
+            } else if (t.degree == 3 && key.compareTo(t.keys[1]) >= 0) {
+                found = searchNode(key, t.children[2], runnable);
+            }
+        } else if (l != null && key.compareTo(l.key) == 0) {
+            return l;
+        }
+        return found;
+    }
+
+    public int size() {
+        return size;
+    }
+
+    public boolean isEmpty() {
+        return root == null;
+    }
+
+    public void clear() {
+        root = null;
+        size = 0;
+        successfulInsertion = false;
+        successfulDeletion = false;
+        underflow = false;
+        singleNodeUnderflow = false;
+        split = false;
+        first = false;
     }
 
     private void keyOrderList(Node n) {
@@ -625,61 +671,6 @@ public class TwoThreeTreeGovno<K extends Comparable<K>, V> {
         }
     }
 
-    private void bfsList(Node n) {
-        Queue<Node> queueOne = new LinkedList<>();
-        Queue<Node> queueTwo = new LinkedList<>();
-        if (n == null) {
-            return;
-        }
-        queueOne.add(n);
-        Node first = null;
-        TreeNode t = null;
-        while (!queueOne.isEmpty() || !queueTwo.isEmpty()) {
-            while (!queueOne.isEmpty()) {
-                first = queueOne.poll();
-                if (first instanceof TreeNode) {
-                    t = (TreeNode) first;
-                    t.print();
-                }
-                if (t.children[0] != null && !(t.children[0] instanceof LeafNode)) {
-                    queueTwo.add(t.children[0]);
-                }
-                if (t.children[1] != null && !(t.children[1] instanceof LeafNode)) {
-                    queueTwo.add(t.children[1]);
-                }
-                if (t.children[2] != null && !(t.children[2] instanceof LeafNode)) {
-                    queueTwo.add(t.children[2]);
-                }
-
-            }
-            if (!queueOne.isEmpty() || !queueTwo.isEmpty()) {
-                System.out.println();
-            }
-            while (!queueTwo.isEmpty()) {
-                first = queueTwo.poll();
-                if (first instanceof TreeNode) {
-                    t = (TreeNode) first;
-                    t.print();
-                }
-                if (t.children[0] != null && !(t.children[0] instanceof LeafNode)) {
-                    queueOne.add(t.children[0]);
-                }
-                if (t.children[1] != null && !(t.children[1] instanceof LeafNode)) {
-                    queueOne.add(t.children[1]);
-                }
-                if (t.children[2] != null && !(t.children[2] instanceof LeafNode)) {
-                    queueOne.add(t.children[2]);
-                }
-
-            }
-            if (!queueOne.isEmpty() || !queueTwo.isEmpty()) {
-                System.out.println();
-            }
-        }
-        System.out.println();
-        keyOrderList(root);
-        System.out.println();
-    }
 
     private int height(Node n) {
         TreeNode t = null;
@@ -696,11 +687,11 @@ public class TwoThreeTreeGovno<K extends Comparable<K>, V> {
         return 0;
     }
 
-    public boolean insert(K key, V val) {
+    public boolean insert(K key, V val, Runnable runnable) {
         boolean insert = false;
         split = false;
         if (!search(key)) {
-            insertKey(key, val);
+            insertKey(key, val, runnable);
         }
         if (successfulInsertion) {
             size++;
@@ -714,18 +705,15 @@ public class TwoThreeTreeGovno<K extends Comparable<K>, V> {
         return search(key, root);
     }
 
-    public boolean remove(K key) {
+    public boolean remove(K key, Runnable runnable) {
         boolean delete = false;
         singleNodeUnderflow = false;
         underflow = false;
         if (search(key)) {
-            System.out.println("searched");
-            root = (TreeNode) remove(key, root);
+            root = (TreeNode) remove(key, root, runnable);
             if (root.degree == 1 && root.children[0] instanceof TreeNode) {
                 root = (TreeNode) root.children[0];
             }
-        } else {
-            System.out.println("not found");
         }
         if (successfulDeletion) {
             size--;
@@ -734,11 +722,54 @@ public class TwoThreeTreeGovno<K extends Comparable<K>, V> {
             if (size == 0) {
                 root = null;
                 first = false;
+            } else {
+                updateTree(root);
             }
-
         }
 
         return delete;
+    }
+
+    public Iterator<K, V> begin() {
+        return new TreeIterator(nodes(), 0);
+    }
+
+    public Iterator<K, V> end() {
+        var nodes = nodes();
+        return new TreeIterator(nodes, nodes.size() - 1);
+    }
+
+    public Iterator<K, V> rBegin() {
+        var nodes = nodes();
+        return new ReverseTreeIterator(nodes, nodes.size() - 1);
+    }
+
+    public Iterator<K, V> rEnd() {
+        return new ReverseTreeIterator(nodes(), 0);
+    }
+
+    public List<LeafNode> nodes() {
+        if (root == null)
+            return Collections.emptyList();
+        return nodes(root);
+    }
+
+    private List<LeafNode> nodes(Node n) {
+        if (n instanceof LeafNode l) {
+            return List.of(l);
+        }
+        List<LeafNode> leafNodes = new ArrayList<>();
+        var t = (TreeNode) n;
+        if (t.children[0] != null) {
+            leafNodes.addAll(nodes(t.children[0]));
+        }
+        if (t.children[1] != null) {
+            leafNodes.addAll(nodes(t.children[1]));
+        }
+        if (t.children[2] != null) {
+            leafNodes.addAll(nodes(t.children[2]));
+        }
+        return leafNodes;
     }
 
     public void keyOrderList() {
@@ -747,10 +778,6 @@ public class TwoThreeTreeGovno<K extends Comparable<K>, V> {
         System.out.println();
     }
 
-    public void bfsList() {
-        System.out.println("Tree");
-        bfsList(root);
-    }
 
     public int numberOfNodes() {
         return size;
@@ -762,5 +789,84 @@ public class TwoThreeTreeGovno<K extends Comparable<K>, V> {
 
     public TreeNode getRoot() {
         return root;
+    }
+
+
+    private class TreeIterator implements Iterator<K, V> {
+        private final List<LeafNode> nodes;
+        private int currentIndex;
+
+        public TreeIterator(List<LeafNode> nodes, int startIndex) {
+            this.nodes = nodes;
+            this.currentIndex = startIndex;
+        }
+
+        @Override
+        public V get() {
+            return nodes.get(currentIndex).val;
+        }
+
+        @Override
+        public void set(V val) {
+            nodes.get(currentIndex).val = val;
+        }
+
+        @Override
+        public void next() {
+            if (inBounds()) {
+                currentIndex++;
+            }
+        }
+
+        @Override
+        public void prev() {
+            if (inBounds()) {
+                currentIndex--;
+            }
+        }
+
+        @Override
+        public boolean inBounds() {
+            return currentIndex >= 0 && currentIndex < nodes.size();
+        }
+    }
+
+    private class ReverseTreeIterator implements Iterator<K, V> {
+        private final List<LeafNode> nodes;
+        private int currentIndex;
+
+        public ReverseTreeIterator(List<LeafNode> nodes, int startIndex) {
+            this.nodes = nodes;
+            this.currentIndex = startIndex;
+        }
+
+        @Override
+        public V get() {
+            return nodes.get(currentIndex).val;
+        }
+
+        @Override
+        public void set(V val) {
+            nodes.get(currentIndex).val = val;
+        }
+
+        @Override
+        public void next() {
+            if (inBounds()) {
+                currentIndex--;
+            }
+        }
+
+        @Override
+        public void prev() {
+            if (inBounds()) {
+                currentIndex++;
+            }
+        }
+
+        @Override
+        public boolean inBounds() {
+            return currentIndex >= 0 && currentIndex < nodes.size();
+        }
     }
 }

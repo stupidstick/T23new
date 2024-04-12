@@ -1,6 +1,6 @@
 package com.example.t23new.visual;
 
-import com.example.t23new.tree.TwoThreeTreeGovno;
+import com.example.t23new.tree.TwoThreeTree;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TextField;
@@ -18,7 +18,7 @@ public class HelloController implements Initializable {
     private TextField valField;
 
 
-    private TwoThreeTreeGovno<Integer, String> tree = new TwoThreeTreeGovno<>(Integer.class);
+    private TwoThreeTree<Integer, String> tree = new TwoThreeTree<>(Integer.class);
 
     private BstPane<Integer, String> treePane = new BstPane<>(tree);
 
@@ -50,18 +50,17 @@ public class HelloController implements Initializable {
 
     @FXML
     private void change() {
-//        Integer key = parseInt(keyField.getText());
-//        if (key == null)
-//            return;
-//        tree.
-//        bst.set(key, valField.getText());
-//        bstPane.displayTree();
+        Integer key = parseInt(keyField.getText());
+        if (key == null)
+            return;
+        tree.set(key, valField.getText());
+        treePane.displayTree();
     }
 
     @FXML
     private void clear() {
-//        bst.clear();
-//        bstPane.displayTree();
+        tree.clear();
+        treePane.displayTree();
     }
 
     private static Integer parseInt(String text) {
