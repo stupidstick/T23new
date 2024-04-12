@@ -90,7 +90,7 @@ public class TwoThreeTreeGovno<K extends Comparable<K>, V> {
     }
 
     private void insertKey(K key, V val) {
-        Node[] array = (Node[]) Array.newInstance(Node.class, 2);
+        Node[] array;
         array = insert(key, val, root);
         if (array[1] == null) {
             root = (TreeNode) array[0];
@@ -494,27 +494,27 @@ public class TwoThreeTreeGovno<K extends Comparable<K>, V> {
                 l3 = (LeafNode) t.children[2];
             }
             if (t.degree == 3) {
-                if (key == l1.key) {
+                if (key.compareTo(l1.key) == 0) {
                     t.children[0] = l2;
                     t.children[1] = l3;
                     t.children[2] = null;
-                } else if (l2 != null && key == l2.key) {
+                } else if (l2 != null && key.compareTo(l2.key) == 0) {
                     t.children[1] = l3;
                     t.children[2] = null;
-                } else if (l3 != null && key == l3.key) {
+                } else if (l3 != null && key.compareTo(l3.key) == 0) {
                     t.children[2] = null;
                 }
                 updateTree(t);
             } else if (t.degree == 2) {
                 underflow = true;
-                if (l1.key == key) {
+                if (l1.key.compareTo(key) == 0) {
                     t.children[0] = l2;
                     t.children[1] = null;
-                } else if (l2.key == key) {
+                } else if (key.compareTo(l2.key) == 0) {
                     t.children[1] = null;
                 }
             } else if (t.degree == 1) {
-                if (l1.key == key) {
+                if (key.compareTo(l1.key) == 0) {
                     t.children[0] = null;
                 }
             }
@@ -595,7 +595,7 @@ public class TwoThreeTreeGovno<K extends Comparable<K>, V> {
             } else if (t.degree == 3 && key.compareTo(t.keys[1]) >= 0) {
                 found = search(key, t.children[2]);
             }
-        } else if (l != null && key == l.key) {
+        } else if (l != null && key.compareTo(l.key) == 0) {
             return true;
         }
 
@@ -731,6 +731,11 @@ public class TwoThreeTreeGovno<K extends Comparable<K>, V> {
             size--;
             delete = successfulDeletion;
             successfulDeletion = false;
+            if (size == 0) {
+                root = null;
+                first = false;
+            }
+
         }
 
         return delete;
